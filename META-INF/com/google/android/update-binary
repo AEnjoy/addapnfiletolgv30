@@ -1,0 +1,101 @@
+#!/sbin/sh
+# LazyFlasher installer backend (for helper functions only)
+# Heavily modified by Dees_Troy and osm0sis
+
+tmp=/dev/tmp/apns
+sys=/system
+
+# detect when flashing in Magisk Manager
+ps | grep zygote | grep -v grep >/dev/null && BOOTMODE=true || BOOTMODE=false;
+$BOOTMODE || ps -A 2>/dev/null | grep zygote | grep -v grep >/dev/null && BOOTMODE=true;
+
+if [ "$3" ]; then
+	zip=$3
+	console=/proc/$$/fd/$2
+fi
+
+print() {
+	if $BOOTMODE; then
+		echo "$1"
+	else
+		if [ "$1" ]; then
+			echo "ui_print $1" > "$console"
+		else
+			echo "ui_print  " > "$console"
+		fi
+	fi
+}
+
+extract() {
+	rm -rf "$2"
+	mkdir -p "$2"
+	unzip -o "$1" -d "$2" || abort "Failed to extract zip to $2!"
+}
+
+print "##########################################"
+print "#         China  APN   for   V30         #"
+print "#                  by 白曦               #"
+print "##########################################"
+
+print "# 为LG v30 添加三网apn文件(无OP版本)"
+print "# 支持美全版(含日刷美,欧版)"
+print "# 解除AVB验证后刷入本模块方可生效"
+print "# 作者白曦"
+print "# 严禁商业用途"
+print "# 这是个一次性脚本，不会作为模块出现在列表中"
+
+print "##########################################"
+
+# unpack the installer
+[ "$zip" ] && {
+    print "调用Magisk..."
+	extract "$zip" "$tmp"
+	print 
+	print "解压配置文件..."
+}
+
+cd "$tmp"
+print "正在安装LG工具箱..."
+pm install LGTOOL.apk 
+
+mount -o rw,remount "$sys"
+tar -xvf config.tar -C "/system"
+cp enable_ue /sdcard/enable_ue
+cp HowToEnableVoLte.txt /sdcard/HowToEnableVoLte.txt
+
+cd "$sys"
+print "正在设置build.prop"
+echo -e "" >> build.prop
+print "正在设置 VOLTE参数...请手动破解VOLTE!"
+echo -e "ro.product.lge.radio_gpri=0" >> build.prop
+echo -e "ro.product.lge.amrwb_gpri=0" >> build.prop
+echo -e "persist.product.lge.ims.volte_open=1" >> build.prop
+echo -e "persist.product.lge.supportvolte=1" >> build.prop
+echo -e "persist.product.lge.supportvt=1" >> build.prop
+echo -e "persist.product.lge.supportvowifi=1" >> build.prop
+echo -e "persist.product.lge.supportviwifi=1" >> build.prop
+echo -e "ro.product.lge.supportvolte=1" >> build.prop
+echo -e "ro.product.lge.supportvilte=1" >> build.prop
+echo -e "ro.vendor.lge.build.target_operator=OPEN" >> build.prop
+echo -e "ro.vendor.lge.build.target_country=CN" >> build.prop
+echo -e "ro.vendor.lge.laop.default.operator=OPEN" >> build.prop
+print "正在设置 DTS 音效 系统版本>=us99828a有效"
+echo -e "ro.lge.globaleffect.dts=true" >> build.prop
+echo -e "ro.lge.globaleffect.ceq=1" >> build.prop
+
+print "设置文件权限..."
+chmod 600 build.prop
+
+print "清理配置文件..."
+cd /
+rm -rf /dev/tmp
+print
+
+
+print "完成"
+print
+print "########################################"
+print "# 请重启手机 重启后手动破解volte~"
+print "# 破解教程已copy至内置存储根目录(TWRP下需解密data分区才能看到文件)"
+print "########################################"
+sleep 3

@@ -1,0 +1,10 @@
+进工程模式，进工程模式 *#546368#*998# （ 546368 的意思是 LGMENU，998是手机的型号）
+Field Test -> GPRL VoLTE/VoWiFi -> ux，把里面全勾上.
+返回 Field Test -> 选择 IMS Setting -> Slot - 0 : OPEN / US -> SIP -> Target Number Format 选择 Local Number
+接着回到IMS Setting ->GPRL VoLTE/VoWiFi -> Slot - 0 : OPEN / CN -> Registraton ,IPSec Enable √ ,接着点击VoLTE √
+返回上一级(GPRL VoLTE/VoWiFi) -> SMS over IMS -> √
+
+进入工程模式 *#*#4636#*#* ( 4636 的意思是 INFO )选择网络模式为 LTE only 或者其它有 LTE 的；
+重启手机生效。
+工程模式 *#546368#*998#（998为机型型号）
+或者使用LG工具箱进入
